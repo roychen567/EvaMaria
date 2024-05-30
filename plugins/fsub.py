@@ -59,6 +59,20 @@ async def ForceSub(bot: Client, update: Message, file_id: str = False, mode="che
         )
         return False
 
+    if REQ_CHANNEL:
+        try:
+            user = await bot.get_chat_member(REQ_CHANNEL, update.from_user.id)
+        except UserNotParticipant:
+            pass
+        except Exception as e:
+            logger.exception(e)
+            pass
+        else:
+            if not (user.status == enums.ChatMemberStatus.BANNED):
+                return True
+            else:
+                pass
+                
     # Mian Logic
     if REQ_CHANNEL and db().isActive():
         try:
