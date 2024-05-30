@@ -37,7 +37,7 @@ DATABASE_NAME = environ.get('DATABASE_NAME', "Roy")
 COLLECTION_NAME = environ.get('COLLECTION_NAME', 'Telegram_files')
 
 # Request Fsub
-REQ_CHANNEL=environ.get("REQ_CHANNEL", "-1002185118093")
+REQ_CHANNEL= int(environ.get("REQ_CHANNEL", "-1002185118093"))
 REQ_CHANNEL = (int(REQ_CHANNEL) if REQ_CHANNEL and id_pattern.search(REQ_CHANNEL) else False) if REQ_CHANNEL is not None else None
 JOIN_REQS_DB = environ.get("JOIN_REQS_DB", DATABASE_URI)
 
