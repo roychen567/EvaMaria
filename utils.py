@@ -176,10 +176,14 @@ async def broadcast_messages(user_id, message):
         return False, "Error"
 
 async def search_gagala(text):
-    usr_agent = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) '
-        'Chrome/61.0.3163.100 Safari/537.36'
-        }
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36',
+        'sec-ch-ua': '"Chromium";v="106", "Google Chrome";v="106", "Not;A=Brand";v="99"',
+        'sec-ch-ua-mobile': '?0',
+        'Connection': 'Keep-alive',
+        'sec-ch-ua-platform': '"Windows"',
+    }
+
     text = text.replace(" ", '+')
     url = f'https://www.google.com/search?q={text}'
     response = requests.get(url, headers=usr_agent)
