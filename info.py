@@ -12,17 +12,17 @@ def is_enabled(value, default):
 
 # Bot information
 SESSION = environ.get('SESSION', 'Media_search')
-API_ID = int(environ.get('API_ID', '7872289'))
-API_HASH = environ.get('API_HASH', 'ba74060bc1f9209cde8aee299d69b518')
-BOT_TOKEN = environ.get('BOT_TOKEN', '1786837074:AAFlsPPU93FNGCbLjwhaz7uEENVejmlxhlM')
+API_ID = int(environ.get('API_ID', '21958444'))
+API_HASH = environ.get('API_HASH', 'c7c23aa495b8cfa4cd784efab9de559f')
+BOT_TOKEN = environ.get('BOT_TOKEN', '7308180365:AAGIP7mKBt8CXoGEVMap5Hb35BD01vnM7OI')
 
 # Bot settings
 CACHE_TIME = int(environ.get('CACHE_TIME', 300))
 USE_CAPTION_FILTER = bool(environ.get('USE_CAPTION_FILTER', False))
 PICS = (environ.get('PICS', 'https://graph.org/file/9c023dd906352100948c8.mp4'))
 # Admins, Channels & Users
-ADMINS = [int(admin) if id_pattern.search(admin) else admin for admin in environ.get('ADMINS', '1380904444').split()]
-CHANNELS = [int(ch) if id_pattern.search(ch) else ch for ch in environ.get('CHANNELS', '-1001944406326').split()]
+ADMINS = [int(admin) if id_pattern.search(admin) else admin for admin in environ.get('ADMINS', '7246677025').split()]
+CHANNELS = [int(ch) if id_pattern.search(ch) else ch for ch in environ.get('CHANNELS', '-1002176523928').split()]
 auth_users = [int(user) if id_pattern.search(user) else user for user in environ.get('AUTH_USERS', '').split()]
 AUTH_USERS = (auth_users + ADMINS) if auth_users else []
 auth_channel = environ.get('AUTH_CHANNEL')
@@ -31,17 +31,17 @@ AUTH_CHANNEL = environ.get('AUTH_CHANNEL')
 AUTH_GROUPS = [int(ch) for ch in auth_grp.split()] if auth_grp else None
 
 # MongoDB information
-DATABASE_URI = environ.get('DATABASE_URI', "mongodb+srv://Roy:Roy@cluster0.iaolxuj.mongodb.net/?retryWrites=true&w=majority")
-DATABASE_NAME = environ.get('DATABASE_NAME', "Roy")
+DATABASE_URI = environ.get('DATABASE_URI', "mongodb+srv://mark42:mark42@mark.rib7tvo.mongodb.net/?retryWrites=true&w=majority&appName=mark")
+DATABASE_NAME = environ.get('DATABASE_NAME', "mark")
 COLLECTION_NAME = environ.get('COLLECTION_NAME', 'Telegram_files')
 
 # Request Fsub
-REQ_CHANNEL= environ.get("REQ_CHANNEL", "-1002238755200")
+REQ_CHANNEL= environ.get("REQ_CHANNEL", "-1002188987730")
 REQ_CHANNEL = (int(REQ_CHANNEL) if REQ_CHANNEL and id_pattern.search(REQ_CHANNEL) else False) if REQ_CHANNEL is not None else None
 JOIN_REQS_DB = environ.get("JOIN_REQS_DB", DATABASE_URI)
 
 # Others
-LOG_CHANNEL = int(environ.get('LOG_CHANNEL', '-1001680037642'))
+LOG_CHANNEL = int(environ.get('LOG_CHANNEL', '-1002161453442'))
 SUPPORT_CHAT = environ.get('SUPPORT_CHAT', 'MOVIES_ZILAA')
 P_TTI_SHOW_OFF = is_enabled((environ.get('P_TTI_SHOW_OFF', 'True')), False)
 IMDB = is_enabled((environ.get('IMDB', 'False')), True)
