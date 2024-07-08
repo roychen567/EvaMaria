@@ -13,7 +13,7 @@ from os import environ
 from aiohttp import web
 from plugins import web_server
 
-# Get logging configurations
+# Configure logging
 try:
     logging.config.fileConfig('logging.conf')
 except Exception as e:
@@ -23,13 +23,13 @@ logging.getLogger().setLevel(logging.INFO)
 logging.getLogger("pyrogram").setLevel(logging.ERROR)
 logging.getLogger("imdbpy").setLevel(logging.ERROR)
 
-PORT = environ.get("PORT", "8080")
+PORT = int(environ.get("PORT", 8080))
 
 class Bot(Client):
 
     def __init__(self):
         super().__init__(
-            name=SESSION,
+            session_name=SESSION,
             api_id=API_ID,
             api_hash=API_HASH,
             bot_token=BOT_TOKEN,
@@ -50,7 +50,7 @@ class Bot(Client):
             logging.error(f"Failed to get banned users or chats: {e}")
 
         await super().start()
-        
+
         try:
             await Media.ensure_indexes()
         except Exception as e:
@@ -70,15 +70,21 @@ class Bot(Client):
             logging.error(f"Failed to send start message to log channel: {e}")
 
         try:
-            app = web.AppRunner(await web_server())
-            await app.setup()
-            bind_address = "0.0.0.0"
-            await web.TCPSite(app, bind_address, PORT).start()
+            app = web.Application()
+            app.add_routes([web.get('/', self.handle)])
+            runner = web.AppRunner(app)
+            await runner.setup()
+            site = web.TCPSite(runner, '0.0.0.0', PORT)
+            await site.start()
+            logging.info(f"Web server started on port {PORT}")
         except Exception as e:
             logging.error(f"Failed to start web server: {e}")
 
         end_time = datetime.now()
         logging.info(f"Bot started at {end_time}, duration: {end_time - start_time}")
+
+    async def handle(self, request):
+        return web.Response(text="EvaMariaBot is running.")
 
     async def stop(self, *args):
         stop_time = datetime.now()
@@ -102,7 +108,7 @@ class Bot(Client):
                 return
             start_time = datetime.now()
             try:
-                messages = await self.get_messages(chat_id, list(range(current, current + new_diff + 1)))
+                messages = await self.get_history(chat_id, limit=new_diff, offset=current)
             except Exception as e:
                 logging.error(f"Failed to retrieve messages: {e}")
                 return
@@ -114,5 +120,6 @@ class Bot(Client):
                 yield message
                 current += 1
 
-app = Bot()
-app.run()
+if __name__ == "__main__":
+    app = Bot()
+    app.run()
