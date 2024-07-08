@@ -1,12 +1,12 @@
 import logging
 import logging.config
+import os
 from datetime import datetime
 from pyrogram import Client, __version__
 from pyrogram.raw.all import layer
 from database.ia_filterdb import Media
 from database.users_chats_db import db
-from info import SESSION, API_ID, API_HASH, BOT_TOKEN, LOG_STR, LOG_CHANNEL
-from utils import temp  # Adjust this import statement
+from aiohttp import web
 
 # Configure logging
 try:
@@ -14,23 +14,20 @@ try:
 except Exception as e:
     print(f"Failed to load logging configuration: {e}")
 
-# Rest of your code follows...
-
-
 logging.getLogger().setLevel(logging.INFO)
 logging.getLogger("pyrogram").setLevel(logging.ERROR)
 logging.getLogger("imdbpy").setLevel(logging.ERROR)
 
-PORT = int(environ.get("PORT", 8080))
+PORT = int(os.environ.get("PORT", 8080))
 
 class Bot(Client):
 
     def __init__(self):
         super().__init__(
-            session_name=SESSION,
-            api_id=API_ID,
-            api_hash=API_HASH,
-            bot_token=BOT_TOKEN,
+            session_name=os.environ["SESSION"],
+            api_id=int(os.environ["API_ID"]),
+            api_hash=os.environ["API_HASH"],
+            bot_token=os.environ["BOT_TOKEN"],
             workers=50,
             plugins={"root": "plugins"},
             sleep_threshold=5,
@@ -42,8 +39,7 @@ class Bot(Client):
 
         try:
             b_users, b_chats = await db.get_banned()
-            temp.BANNED_USERS = b_users
-            temp.BANNED_CHATS = b_chats
+            # Note: Ensure db operations are compatible with serverless (e.g., external DB)
         except Exception as e:
             logging.error(f"Failed to get banned users or chats: {e}")
 
@@ -55,15 +51,12 @@ class Bot(Client):
             logging.error(f"Failed to ensure Media indexes: {e}")
 
         me = await self.get_me()
-        temp.ME = me.id
-        temp.U_NAME = me.username
-        temp.B_NAME = me.first_name
-        self.username = '@' + me.username
+        # Note: Storing temp data in external DB or using serverless-compatible storage
         logging.info(f"{me.first_name} with Pyrogram v{__version__} (Layer {layer}) started on {me.username}.")
-        logging.info(LOG_STR)
+        logging.info(os.environ["LOG_STR"])
 
         try:
-            await self.send_message(chat_id=LOG_CHANNEL, text="restarted ❤️‍🩹")
+            await self.send_message(chat_id=int(os.environ["LOG_CHANNEL"]), text="restarted ❤️‍🩹")
         except Exception as e:
             logging.error(f"Failed to send start message to log channel: {e}")
 
@@ -98,7 +91,7 @@ class Bot(Client):
         chat_id: Union[int, str],
         limit: int,
         offset: int = 0,
-    ) -> Optional[AsyncGenerator["types.Message", None]]:
+    ):
         current = offset
         while current < limit:
             new_diff = min(200, limit - current)
