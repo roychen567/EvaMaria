@@ -1,15 +1,15 @@
-class script(object):
+class script:
     START_TXT = """Hᴇʟʟᴏ {},
-Mʏ Nᴀᴍᴇ Is 𝑨𝒍𝒂𝒏 𝑾𝒂𝒍𝒌𝒆𝒓, I Cᴀɴ Pʀᴏᴠɪᴅᴇ Mᴏᴠɪᴇs, Jᴜsᴛ Aᴅᴅ Mᴇ Tᴏ Yᴏᴜʀ Gʀᴏᴜᴘ Aɴᴅ Eɴᴊᴏʏ 😍"""
+Mʏ Nᴀᴍᴇ Is ɪʀᴏɴ ᴍᴀɴ, I Cᴀɴ Pʀᴏᴠɪᴅᴇ Mᴏᴠɪᴇs, Jᴜsᴛ Aᴅᴅ Mᴇ Tᴏ Yᴏᴜʀ Gʀᴏᴜᴘ Aɴᴅ Eɴᴊᴏʏ 😍"""
     HELP_TXT = """
-    🙋🏻‍♂️   Hellooo  {} 🤓
-     
- /start - Check I'm Alive..
- /status - Bot Status
- /info - User info 
- /id - User id
- /stats - Db status  
- /broadcast - Broadcast (owner only)
+🙋🏻‍♂️   Hellooo  {} 🤓
+
+/start - Check I'm Alive..
+/status - Bot Status
+/info - User info 
+/id - User id
+/stats - Db status  
+/broadcast - Broadcast (owner only)
 
 ○ Notice 📙:-
 
@@ -88,7 +88,7 @@ these are the extra features of Eva Maria
 This module only works for my admins
 
 <b>Commands and Usage:</b>
-• /logs - <code>to get the rescent errors</code>
+• /logs - <code>to get the recent errors</code>
 • /stats - <code>to get status of files in db.</code>
 • /delete - <code>to delete a specific file from db.</code>
 • /users - <code>to get list of my users and ids.</code>
