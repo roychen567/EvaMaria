@@ -1,13 +1,18 @@
 FROM python:3.10.8-slim-buster
 
-RUN apt update && apt upgrade -y
-RUN apt install git -y
-COPY requirements.txt /requirements.txt
+# Update and install dependencies
+RUN apt-get update && apt-get upgrade -y \
+    && apt-get install -y git
 
-RUN cd /
-RUN pip3 install -U pip && pip3 install -U -r requirements.txt
+# Copy requirements file and install dependencies
+COPY requirements.txt /requirements.txt
+RUN pip install -U pip && pip install -U -r /requirements.txt
+
+# Set working directory
 WORKDIR /leo
 
+# Copy the entire project
 COPY . .
 
+# Default command to run when the container starts
 CMD ["python3", "bot.py"]
