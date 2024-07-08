@@ -1,5 +1,6 @@
 import logging
 import logging.config
+import os  # Import os module for environment variables
 from datetime import datetime
 from pyrogram import Client, __version__
 from pyrogram.raw.all import layer
@@ -8,7 +9,6 @@ from database.users_chats_db import db
 from info import SESSION, API_ID, API_HASH, BOT_TOKEN, LOG_STR, LOG_CHANNEL
 from typing import Union, Optional, AsyncGenerator
 from aiohttp import web
-from plugins import web_server
 
 # Configure logging
 try:
@@ -20,7 +20,7 @@ logging.getLogger().setLevel(logging.INFO)
 logging.getLogger("pyrogram").setLevel(logging.ERROR)
 logging.getLogger("imdbpy").setLevel(logging.ERROR)
 
-PORT = int(environ.get("PORT", 8080))
+PORT = int(os.environ.get("PORT", 8080))  # Access PORT environment variable using os.environ.get()
 
 class Bot(Client):
 
@@ -41,7 +41,7 @@ class Bot(Client):
 
         try:
             b_users, b_chats = await db.get_banned()
-            # Handle banned users and chats without temp
+            # Handle banned users or chats if necessary
         except Exception as e:
             logging.error(f"Failed to get banned users or chats: {e}")
 
@@ -53,7 +53,7 @@ class Bot(Client):
             logging.error(f"Failed to ensure Media indexes: {e}")
 
         me = await self.get_me()
-        self.username = '@' + me.username
+        # Handle me object if necessary
         logging.info(f"{me.first_name} with Pyrogram v{__version__} (Layer {layer}) started on {me.username}.")
         logging.info(LOG_STR)
 
