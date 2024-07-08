@@ -6,16 +6,16 @@ from pyrogram.raw.all import layer
 from database.ia_filterdb import Media
 from database.users_chats_db import db
 from info import SESSION, API_ID, API_HASH, BOT_TOKEN, LOG_STR, LOG_CHANNEL
-from utils import temp
-from typing import Union, Optional, AsyncGenerator
-from os import environ
-from aiohttp import web
+from utils import temp  # Adjust this import statement
 
 # Configure logging
 try:
     logging.config.fileConfig('logging.conf')
 except Exception as e:
     print(f"Failed to load logging configuration: {e}")
+
+# Rest of your code follows...
+
 
 logging.getLogger().setLevel(logging.INFO)
 logging.getLogger("pyrogram").setLevel(logging.ERROR)
