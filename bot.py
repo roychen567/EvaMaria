@@ -6,8 +6,9 @@ from pyrogram.raw.all import layer
 from database.ia_filterdb import Media
 from database.users_chats_db import db
 from info import SESSION, API_ID, API_HASH, BOT_TOKEN, LOG_STR, LOG_CHANNEL
-from utils import temp  # Adjust this import statement
-from typing import Union, Optional, AsyncGenerator  # Add this line
+from typing import Union, Optional, AsyncGenerator
+from aiohttp import web
+from plugins import web_server
 
 # Configure logging
 try:
@@ -40,8 +41,7 @@ class Bot(Client):
 
         try:
             b_users, b_chats = await db.get_banned()
-            temp.BANNED_USERS = b_users
-            temp.BANNED_CHATS = b_chats
+            # Handle banned users and chats without temp
         except Exception as e:
             logging.error(f"Failed to get banned users or chats: {e}")
 
@@ -53,9 +53,6 @@ class Bot(Client):
             logging.error(f"Failed to ensure Media indexes: {e}")
 
         me = await self.get_me()
-        temp.ME = me.id
-        temp.U_NAME = me.username
-        temp.B_NAME = me.first_name
         self.username = '@' + me.username
         logging.info(f"{me.first_name} with Pyrogram v{__version__} (Layer {layer}) started on {me.username}.")
         logging.info(LOG_STR)
