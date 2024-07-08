@@ -1,13 +1,7 @@
 import io
 from pyrogram import filters, Client, enums
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
-from database.filters_mdb import(
-   add_filter,
-   get_filters,
-   delete_filter,
-   count_filters
-)
-
+from database.filters_mdb import add_filter, get_filters, delete_filter, count_filters
 from database.connections_mdb import active_connection
 from utils import get_file_id, parser, split_quotes
 from info import ADMINS
@@ -17,7 +11,7 @@ from info import ADMINS
 async def addfilter(client, message):
     userid = message.from_user.id if message.from_user else None
     if not userid:
-        return await message.reply(f"You are anonymous admin. Use /connect {message.chat.id} in PM")
+        return await message.reply(f"You are an anonymous admin. Use /connect {message.chat.id} in PM")
     chat_type = message.chat.type
     args = message.text.html.split(None, 1)
 
@@ -28,7 +22,7 @@ async def addfilter(client, message):
             try:
                 chat = await client.get_chat(grpid)
                 title = chat.title
-            except:
+            except Exception as e:
                 await message.reply_text("Make sure I'm present in your group!!", quote=True)
                 return
         else:
@@ -49,7 +43,6 @@ async def addfilter(client, message):
         and str(userid) not in ADMINS
     ):
         return
-
 
     if len(args) < 2:
         await message.reply_text("Command Incomplete :(", quote=True)
@@ -81,9 +74,9 @@ async def addfilter(client, message):
                 reply_text = message.reply_to_message.text.html
                 fileid = None
             alert = None
-        except:
+        except Exception as e:
             reply_text = ""
-            btn = "[]" 
+            btn = "[]"
             fileid = None
             alert = None
 
@@ -92,7 +85,7 @@ async def addfilter(client, message):
             msg = get_file_id(message.reply_to_message)
             fileid = msg.file_id if msg else None
             reply_text, btn, alert = parser(extracted[1], text) if message.reply_to_message.sticker else parser(message.reply_to_message.caption.html, text)
-        except:
+        except Exception as e:
             reply_text = ""
             btn = "[]"
             alert = None
@@ -100,7 +93,7 @@ async def addfilter(client, message):
         try:
             fileid = None
             reply_text, btn, alert = parser(message.reply_to_message.text.html, text)
-        except:
+        except Exception as e:
             reply_text = ""
             btn = "[]"
             alert = None
@@ -110,7 +103,7 @@ async def addfilter(client, message):
     await add_filter(grp_id, text, reply_text, btn, fileid, alert)
 
     await message.reply_text(
-        f"Filter for  `{text}`  added in  **{title}**",
+        f"Filter for `{text}` added in **{title}**",
         quote=True,
         parse_mode=enums.ParseMode.MARKDOWN
     )
@@ -118,11 +111,10 @@ async def addfilter(client, message):
 
 @Client.on_message(filters.command(['viewfilters', 'filters']) & filters.incoming)
 async def get_all(client, message):
-    
     chat_type = message.chat.type
     userid = message.from_user.id if message.from_user else None
     if not userid:
-        return await message.reply(f"You are anonymous admin. Use /connect {message.chat.id} in PM")
+        return await message.reply(f"You are an anonymous admin. Use /connect {message.chat.id} in PM")
     if chat_type == enums.ChatType.PRIVATE:
         grpid = await active_connection(str(userid))
         if grpid is not None:
@@ -130,7 +122,7 @@ async def get_all(client, message):
             try:
                 chat = await client.get_chat(grpid)
                 title = chat.title
-            except:
+            except Exception as e:
                 await message.reply_text("Make sure I'm present in your group!!", quote=True)
                 return
         else:
@@ -155,10 +147,10 @@ async def get_all(client, message):
     texts = await get_filters(grp_id)
     count = await count_filters(grp_id)
     if count:
-        filterlist = f"Total number of filters in **{title}** : {count}\n\n"
+        filterlist = f"Total number of filters in **{title}**: {count}\n\n"
 
         for text in texts:
-            keywords = " ×  `{}`\n".format(text)
+            keywords = "× `{}`\n".format(text)
 
             filterlist += keywords
 
@@ -178,7 +170,8 @@ async def get_all(client, message):
         quote=True,
         parse_mode=enums.ParseMode.MARKDOWN
     )
-        
+
+
 @Client.on_message(filters.command('del') & filters.incoming)
 async def deletefilter(client, message):
     userid = message.from_user.id if message.from_user else None
@@ -193,7 +186,7 @@ async def deletefilter(client, message):
             try:
                 chat = await client.get_chat(grpid)
                 title = chat.title
-            except:
+            except Exception as e:
                 await message.reply_text("Make sure I'm present in your group!!", quote=True)
                 return
         else:
@@ -217,9 +210,9 @@ async def deletefilter(client, message):
 
     try:
         cmd, text = message.text.split(" ", 1)
-    except:
+    except Exception as e:
         await message.reply_text(
-            "<i>Mention the filtername which you wanna delete!</i>\n\n"
+            "<i>Mention the filter name which you want to delete!</i>\n\n"
             "<code>/del filtername</code>\n\n"
             "Use /viewfilters to view all available filters",
             quote=True
@@ -229,7 +222,7 @@ async def deletefilter(client, message):
     query = text.lower()
 
     await delete_filter(message, query, grp_id)
-        
+
 
 @Client.on_message(filters.command('delall') & filters.incoming)
 async def delallconfirm(client, message):
@@ -245,7 +238,7 @@ async def delallconfirm(client, message):
             try:
                 chat = await client.get_chat(grpid)
                 title = chat.title
-            except:
+            except Exception as e:
                 await message.reply_text("Make sure I'm present in your group!!", quote=True)
                 return
         else:
@@ -259,15 +252,13 @@ async def delallconfirm(client, message):
     else:
         return
 
-
     st = await client.get_chat_member(grp_id, userid)
     if (st.status == enums.ChatMemberStatus.OWNER) or (str(userid) in ADMINS):
         await message.reply_text(
             f"This will delete all filters from '{title}'.\nDo you want to continue??",
             reply_markup=InlineKeyboardMarkup([
-                [InlineKeyboardButton(text="YES",callback_data="delallconfirm")],
-                [InlineKeyboardButton(text="CANCEL",callback_data="delallcancel")]
+                [InlineKeyboardButton(text="YES", callback_data="delallconfirm")],
+                [InlineKeyboardButton(text="CANCEL", callback_data="delallcancel")]
             ]),
             quote=True
         )
-
