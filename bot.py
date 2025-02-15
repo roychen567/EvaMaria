@@ -30,11 +30,9 @@ class Bot(Client):
             plugins=dict(root="plugins")  # Ensure plugins are loaded
         )
 
- async def start(self):
-        b_users, b_chats = await db.get_banned()
-        temp.BANNED_USERS = b_users
-        temp.BANNED_CHATS = b_chats
-@@ -87,46 +89,46 @@ async def start(self):
+    async def start(self):
+        print("Bot is starting...")
+        
     async def stop(self, *args):
         await super().stop()
         logging.info("Bot stopped. Bye.")
