@@ -6,7 +6,7 @@ from datetime import datetime
 from pyrogram import Client, idle
 from database.ia_filterdb import Media, db as clientDB
 from database.users_chats_db import db
-from info import SESSION, API_ID, API_HASH, BOT_TOKEN, LOG_STR, LOG_CHANNEL
+from info import *
 from aiohttp import web
 from plugins import web_server
 from plugins.commands import *
