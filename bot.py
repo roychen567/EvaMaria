@@ -10,7 +10,7 @@ from info import SESSION, API_ID, API_HASH, BOT_TOKEN, LOG_STR, LOG_CHANNEL
 from aiohttp import web
 from plugins import web_server
 from plugins.commands import *
-from utils import Temp
+from utils import Temp  # Ensure Temp is properly defined in utils.py
 
 # Configure Logging
 try:
@@ -37,11 +37,12 @@ class Bot(Client):
         await super().start()  # Ensure bot starts properly
         print("Bot is starting...")
         logging.info("Bot has started successfully.")  # Log confirmation
+        
         try:
             await self.send_message(LOG_CHANNEL, f"✅ Bot Started Successfully!\n{LOG_STR}")
         except Exception as e:
             logging.error(f"Failed to send start message to log channel: {e}")
-
+        
         try:
             app_runner = web.AppRunner(await web_server())
             await app_runner.setup()
