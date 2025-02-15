@@ -1,8 +1,8 @@
 import logging
 import logging.config
-import os  # Import os module for environment variables
+import os  
 from datetime import datetime
-from pyrogram import Client, __version__
+from pyrogram import Client, __version__, idle
 from pyrogram.raw.all import layer
 from database.ia_filterdb import Media
 from database.users_chats_db import db
@@ -67,4 +67,6 @@ class Bot(Client):
         await super().stop()
 
 app = Bot()
-app.run()
+app.start()
+idle()  # Keeps the bot running
+app.stop()
