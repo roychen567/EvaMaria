@@ -31,8 +31,8 @@ AUTH_CHANNEL = int(environ.get('AUTH_CHANNEL', '-1001868251572'))  # Assuming AU
 AUTH_GROUPS = [int(ch) for ch in environ.get('AUTH_GROUP', '-1001697068765').split()] if environ.get('AUTH_GROUP') else []
 
 # MongoDB information
-DATABASE_URI = environ.get('DATABASE_URI', "mongodb+srv://mark42:mark42@mark.rib7tvo.mongodb.net/?retryWrites=true&w=majority&appName=mark")
-DATABASE_NAME = environ.get('DATABASE_NAME', "mark")
+DATABASE_URI = environ.get('DATABASE_URI', "mongodb+srv://roychen346:roychen346@ironman.upudl.mongodb.net/?retryWrites=true&w=majority&appName=ironman")
+DATABASE_NAME = environ.get('DATABASE_NAME', "ironman")
 COLLECTION_NAME = environ.get('COLLECTION_NAME', 'Telegram_files')
 
 # Request Fsub
