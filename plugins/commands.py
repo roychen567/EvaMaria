@@ -8,7 +8,7 @@ from database.ia_filterdb import Media, get_file_details
 from database.users_chats_db import db
 from info import CHANNELS, ADMINS, LOG_CHANNEL, PICS, BATCH_FILE_CAPTION, CUSTOM_FILE_CAPTION
 from utils import get_size, save_group_settings
-from utils import temp  # Import the class separately
+from utils import Temp  # Import the class separately
 from plugins.fsub import ForceSub
 import base64
 from Script import script
