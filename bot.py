@@ -9,6 +9,8 @@ from database.users_chats_db import db
 from info import SESSION, API_ID, API_HASH, BOT_TOKEN, LOG_STR, LOG_CHANNEL
 from aiohttp import web
 from plugins import web_server
+from plugins import commands
+
 # Configure Logging
 try:
     logging.config.fileConfig('logging.conf')
