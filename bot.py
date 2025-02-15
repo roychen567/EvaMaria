@@ -34,21 +34,9 @@ class Bot(Client):
         )
 
     async def start(self):
+        await super().start()  # Ensure bot starts properly
         print("Bot is starting...")
-        
-    async def stop(self, *args):
-        await super().stop()
-        logging.info("Bot stopped. Bye.")
-        
-        try:
-            await db.get_banned()
-        except Exception as e:
-            logging.error(f"Failed to get banned users or chats: {e}")
-        try:
-            await Media.ensure_indexes()
-        except Exception as e:
-            logging.error(f"Failed to ensure database indexes: {e}")
-
+        logging.info("Bot has started successfully.")  # Log confirmation
         try:
             await self.send_message(LOG_CHANNEL, f"✅ Bot Started Successfully!\n{LOG_STR}")
         except Exception as e:
@@ -61,18 +49,20 @@ class Bot(Client):
             await web.TCPSite(app_runner, bind_address, PORT).start()
         except Exception as e:
             logging.error(f"Failed to start web server: {e}")
-        end_time = datetime.now()
-        logging.info(f"Bot started at {end_time}, duration: {end_time - start_time}")
+
     async def stop(self, *args):
         stop_time = datetime.now()
         logging.info(f"Stopping bot at {stop_time}")
         await super().stop()
+        logging.info("Bot stopped. Bye.")
 
 app = Bot()
+
 async def main():
     await app.start()
     print("🚀 Bot is running...")  # Confirm in console
     await idle()  # Keeps the bot running and responding
     await app.stop()
+
 if __name__ == "__main__":
     asyncio.run(main())
