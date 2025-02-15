@@ -10,7 +10,7 @@ from info import SESSION, API_ID, API_HASH, BOT_TOKEN, LOG_STR, LOG_CHANNEL
 from aiohttp import web
 from plugins import web_server
 from plugins.commands import *
-from utils import temp
+from utils import Temp
 
 # Configure Logging
 try:
