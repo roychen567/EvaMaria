@@ -1,120 +1,93 @@
-import pymongo
-from pyrogram import enums
-from info import DATABASE_URI, DATABASE_NAME
 import logging
+from struct import pack
+import re
+import base64
+from pyrogram.file_id import FileId
+from pymongo.errors import DuplicateKeyError
+from umongo import Instance, Document, fields
+from motor.motor_asyncio import AsyncIOMotorClient
+from marshmallow.exceptions import ValidationError
+from info import DATABASE_URI, DATABASE_NAME
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.ERROR)
 
-myclient = pymongo.MongoClient(DATABASE_URI)
-mydb = myclient[DATABASE_NAME]
+client = AsyncIOMotorClient(DATABASE_URI)
+db = client[DATABASE_NAME]
+instance = Instance.from_db(db)
 
-def add_filter(grp_id, text, reply_text, btn, file, alert):
-    mycol = mydb[str(grp_id)]
-    # mycol.create_index([('text', 'text')])
+@instance.register
+class Filter(Document):
+    text = fields.StrField(attribute='_id')
+    reply = fields.StrField(required=True)
+    btn = fields.StrField(allow_none=True)
+    file = fields.StrField(allow_none=True)
+    alert = fields.StrField(allow_none=True)
 
-    data = {
-        'text': str(text),
-        'reply': str(reply_text),
-        'btn': str(btn),
-        'file': str(file),
-        'alert': str(alert)
-    }
+    class Meta:
+        collection_name = "filters"
 
+async def add_filter(grp_id, text, reply_text, btn, file, alert):
     try:
-        mycol.update_one({'text': str(text)}, {"$set": data}, upsert=True)
-    except Exception as e:
-        logger.exception('Some error occurred!', exc_info=True)
+        filter_entry = Filter(
+            text=f"{grp_id}_{text}",
+            reply=reply_text,
+            btn=btn,
+            file=file,
+            alert=alert
+        )
+        await filter_entry.commit()
+    except ValidationError:
+        logger.exception("Validation error while saving filter")
+        return False
+    except DuplicateKeyError:
+        logger.warning(f"Filter '{text}' already exists for group {grp_id}")
+        return False
+    except Exception:
+        logger.exception("Error while saving filter")
         return False
     return True
 
-def find_filter(group_id, name):
-    mycol = mydb[str(group_id)]
-
+async def find_filter(group_id, name):
     try:
-        query = mycol.find({"text": name})
-        for file in query:
-            reply_text = file['reply']
-            btn = file['btn']
-            fileid = file['file']
-            alert = file.get('alert', None)
-            return reply_text, btn, alert, fileid
-    except Exception as e:
-        logger.exception('Some error occurred!', exc_info=True)
-        return None, None, None, None
+        filter_entry = await Filter.find_one({"_id": f"{group_id}_{name}"})
+        if filter_entry:
+            return filter_entry.reply, filter_entry.btn, filter_entry.alert, filter_entry.file
+    except Exception:
+        logger.exception("Error while fetching filter")
+    return None, None, None, None
 
-def get_filters(group_id):
-    mycol = mydb[str(group_id)]
-    texts = []
-
+async def get_filters(group_id):
+    filters_list = []
     try:
-        query = mycol.find()
-        for file in query:
-            text = file['text']
-            texts.append(text)
-    except Exception as e:
-        logger.exception('Some error occurred!', exc_info=True)
+        async for filter_entry in Filter.find({"_id": {"$regex": f"^{group_id}_"}}):
+            filters_list.append(filter_entry.text.split("_", 1)[1])
+    except Exception:
+        logger.exception("Error while fetching filters")
         return []
-    return texts
+    return filters_list
 
-async def delete_filter(message, text, group_id):
-    mycol = mydb[str(group_id)]
-
-    myquery = {'text': text}
+async def delete_filter(group_id, text):
     try:
-        query = mycol.count_documents(myquery)
-        if query == 1:
-            mycol.delete_one(myquery)
-            await message.reply_text(
-                f"'`{text}`' deleted. I'll not respond to that filter anymore.",
-                quote=True,
-                parse_mode=enums.ParseMode.MARKDOWN
-            )
-        else:
-            await message.reply_text("Couldn't find that filter!", quote=True)
-    except Exception as e:
-        logger.exception('Some error occurred!', exc_info=True)
-        await message.reply_text("An error occurred while trying to delete the filter.", quote=True)
+        filter_entry = await Filter.find_one({"_id": f"{group_id}_{text}"})
+        if filter_entry:
+            await filter_entry.delete()
+            return True
+    except Exception:
+        logger.exception("Error while deleting filter")
+    return False
 
-async def del_all(message, group_id, title):
-    if str(group_id) not in mydb.list_collection_names():
-        await message.edit_text(f"Nothing to remove in {title}!")
-        return
-
-    mycol = mydb[str(group_id)]
+async def del_all(group_id):
     try:
-        mycol.drop()
-        await message.edit_text(f"All filters from {title} have been removed")
-    except Exception as e:
-        logger.exception('Some error occurred!', exc_info=True)
-        await message.edit_text("Couldn't remove all filters from the group!")
+        await Filter.collection.delete_many({"_id": {"$regex": f"^{group_id}_"}})
+        return True
+    except Exception:
+        logger.exception("Error while deleting all filters")
+    return False
 
-def count_filters(group_id):
-    mycol = mydb[str(group_id)]
-
+def count_filters():
     try:
-        count = mycol.count_documents({})
-        return False if count == 0 else count
-    except Exception as e:
-        logger.exception('Some error occurred!', exc_info=True)
-        return False
-
-def filter_stats():
-    collections = mydb.list_collection_names()
-
-    if "CONNECTION" in collections:
-        collections.remove("CONNECTION")
-
-    totalcount = 0
-    try:
-        for collection in collections:
-            mycol = mydb[collection]
-            count = mycol.count_documents({})
-            totalcount += count
-    except Exception as e:
-        logger.exception('Some error occurred!', exc_info=True)
-        return 0, 0
-
-    totalcollections = len(collections)
-
-    return totalcollections, totalcount
+        return Filter.count_documents()
+    except Exception:
+        logger.exception("Error while counting filters")
+        return 0
