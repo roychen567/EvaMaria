@@ -35,9 +35,12 @@ async def start(client, message):
                 await client.send_message(LOG_CHANNEL, script.LOG_TEXT_G.format(message.chat.title, message.chat.id, total, "Unknown"))       
                 await db.add_chat(message.chat.id, message.chat.title)
             return
-        elif not await db.is_user_exist(message.from_user.id):
-            await db.add_user(message.from_user.id, message.from_user.first_name)
-            await client.send_message(LOG_CHANNEL, script.LOG_TEXT_P.format(message.from_user.id, message.from_user.mention))
+       is_user_exist = await db.is_user_exist(message.from_user.id)  # Await first
+if len(message.command) != 2:
+    # Code here...
+elif not is_user_exist:  # Now use it
+    await db.add_user(message.from_user.id, message.from_user.first_name)
+    await client.send_message(LOG_CHANNEL, script.LOG_TEXT_P.format(message.from_user.id, message.from_user.mention))
         
         if len(message.command) != 2:
             buttons = [
