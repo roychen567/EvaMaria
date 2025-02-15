@@ -1,18 +1,16 @@
 import logging
 import logging.config
-import os  # Import os module for environment variables
-import asyncio  # Import asyncio for async execution
+import os  
+import asyncio  
 from datetime import datetime
-from pyrogram import Client, __version__
-from pyrogram.raw.all import layer
+from pyrogram import Client, idle
 from database.ia_filterdb import Media
 from database.users_chats_db import db
 from info import SESSION, API_ID, API_HASH, BOT_TOKEN, LOG_STR, LOG_CHANNEL
 from aiohttp import web
 from plugins import web_server
-from pyrogram import idle  # Import idle to keep the bot running
 
-# Get logging configurations
+# Configure Logging
 try:
     logging.config.fileConfig('logging.conf')
 except Exception as e:
@@ -24,13 +22,13 @@ logging.getLogger("imdbpy").setLevel(logging.ERROR)
 PORT = os.environ.get("PORT", "8080")
 
 class Bot(Client):
-
     def __init__(self):
         super().__init__(
             name=SESSION,
             api_id=API_ID,
             api_hash=API_HASH,
             bot_token=BOT_TOKEN,
+            plugins=dict(root="plugins")  # Ensure plugins are loaded
         )
 
     async def start(self):
@@ -48,7 +46,7 @@ class Bot(Client):
             logging.error(f"Failed to ensure database indexes: {e}")
 
         try:
-            await self.send_message(LOG_CHANNEL, LOG_STR)
+            await self.send_message(LOG_CHANNEL, f"✅ Bot Started Successfully!\n{LOG_STR}")
         except Exception as e:
             logging.error(f"Failed to send start message to log channel: {e}")
 
@@ -72,8 +70,9 @@ app = Bot()
 
 async def main():
     await app.start()
-    await idle()  # Keeps the bot running
+    print("🚀 Bot is running...")  # Confirm in console
+    await idle()  # Keeps the bot running and responding
     await app.stop()
 
 if __name__ == "__main__":
-    asyncio.run(main())  # Run the async function
+    asyncio.run(main())
