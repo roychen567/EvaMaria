@@ -17,8 +17,12 @@ logger = logging.getLogger(__name__)
 
 @Client.on_message(filters.command("start") & filters.incoming)
 async def start(client, message):
+    print("✅ Start command received!")  # Debug log
     try:
         if message.chat.type in [enums.ChatType.GROUP, enums.ChatType.SUPERGROUP]:
+            print("➡️ Start command in a group chat")  # Debug log
+        else:
+            print(f"➡️ Start command in a private chat by {message.from_user.id}")  # Debug log
             buttons = [
                 [InlineKeyboardButton('🤖 𝚄𝚙𝚍𝚊𝚝𝚎𝚜', url='https://t.me/+N8PS75om8Zw5ZjE1')],
                 [InlineKeyboardButton('ℹ️ 𝙷𝚎𝚕𝚙', url=f"https://t.me/{temp.U_NAME}?start=help")],
