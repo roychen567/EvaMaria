@@ -28,26 +28,20 @@ async def start(client, message):
                 [InlineKeyboardButton('ℹ️ 𝙷𝚎𝚕𝚙', url=f"https://t.me/{temp.U_NAME}?start=help")],
             ]
             reply_markup = InlineKeyboardMarkup(buttons)
-            await message.reply(script.START_TXT.format(message.from_user.mention if message.from_user else message.chat.title, temp.U_NAME, temp.B_NAME), reply_markup=reply_markup)
+            await message.reply(
+                script.START_TXT.format(message.from_user.mention if message.from_user else message.chat.title, temp.U_NAME, temp.B_NAME),
+                reply_markup=reply_markup
+            )
             await asyncio.sleep(2)
+
             if not await db.get_chat(message.chat.id):
                 total = await client.get_chat_members_count(message.chat.id)
                 await client.send_message(LOG_CHANNEL, script.LOG_TEXT_G.format(message.chat.title, message.chat.id, total, "Unknown"))       
                 await db.add_chat(message.chat.id, message.chat.title)
-            return
-       is_user_exist = await db.is_user_exist(message.from_user.id)  # Await first
-if len(message.command) != 2:
-    # Code here...
-else:
-    is_user_exist = await db.is_user_exist(message.from_user.id)  # Await first
-    if not is_user_exist:  # Now use it
-        await db.add_user(message.from_user.id, message.from_user.first_name)
-        await client.send_message(
-            LOG_CHANNEL, 
-            script.LOG_TEXT_P.format(message.from_user.id, message.from_user.mention)
-        )
 
-        
+        # Check if user exists
+        is_user_exist = await db.is_user_exist(message.from_user.id)
+
         if len(message.command) != 2:
             buttons = [
                 [InlineKeyboardButton('🔸 ɢʀᴏᴜᴘ 🔸', url='https://t.me/+N8PS75om8Zw5ZjE1'),
@@ -85,8 +79,18 @@ else:
                 reply_markup=reply_markup,
                 parse_mode=enums.ParseMode.HTML
             )
+
+        # If user does not exist, add them to the database
+        if not is_user_exist:
+            await db.add_user(message.from_user.id, message.from_user.first_name)
+            await client.send_message(
+                LOG_CHANNEL, 
+                script.LOG_TEXT_P.format(message.from_user.id, message.from_user.mention)
+            )
+
     except Exception as e:
         logger.exception("Error in start command: %s", e)
+
 
 @Client.on_message(filters.command('channel') & filters.user(ADMINS))
 async def channel_info(client, message):
