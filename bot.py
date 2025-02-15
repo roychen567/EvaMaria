@@ -1,14 +1,16 @@
 import logging
 import logging.config
-import os  
+import os  # Import os module for environment variables
+import asyncio  # Import asyncio for async execution
 from datetime import datetime
-from pyrogram import Client, __version__, idle
+from pyrogram import Client, __version__
 from pyrogram.raw.all import layer
 from database.ia_filterdb import Media
 from database.users_chats_db import db
 from info import SESSION, API_ID, API_HASH, BOT_TOKEN, LOG_STR, LOG_CHANNEL
 from aiohttp import web
 from plugins import web_server
+from pyrogram import idle  # Import idle to keep the bot running
 
 # Get logging configurations
 try:
@@ -67,6 +69,11 @@ class Bot(Client):
         await super().stop()
 
 app = Bot()
-app.start()
-idle()  # Keeps the bot running
-app.stop()
+
+async def main():
+    await app.start()
+    await idle()  # Keeps the bot running
+    await app.stop()
+
+if __name__ == "__main__":
+    asyncio.run(main())  # Run the async function
