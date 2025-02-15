@@ -1,37 +1,39 @@
-import logging
 import logging.config
-import os  
-import asyncio  
-from datetime import datetime
-from pyrogram import Client, idle
-from database.ia_filterdb import Media
-from database.users_chats_db import db
-from info import SESSION, API_ID, API_HASH, BOT_TOKEN, LOG_STR, LOG_CHANNEL
-from aiohttp import web
-from plugins import web_server
 
-# Configure Logging
-try:
-    logging.config.fileConfig('logging.conf')
-except Exception as e:
-    logging.error(f"Failed to load logging configuration: {e}")
-
+# Get logging configurations
+logging.config.fileConfig('logging.conf')
+logging.getLogger().setLevel(logging.INFO)
 logging.getLogger("pyrogram").setLevel(logging.ERROR)
 logging.getLogger("imdbpy").setLevel(logging.ERROR)
 
-PORT = os.environ.get("PORT", "8080")
+from pyrogram import Client, __version__
+from pyrogram.raw.all import layer
+from database.ia_filterdb import Media, Media2, choose_mediaDB, db as clientDB
+from database.users_chats_db import db
+from info import SESSION, API_ID, API_HASH, BOT_TOKEN, LOG_STR, LOG_CHANNEL, SECONDDB_URI, REQ_CHANNEL_ONE, REQ_CHANNEL_TWO
+from info import temp
+from typing import Union, Optional, AsyncGenerator
+from pyrogram import types
+from Script import script 
+from datetime import date, datetime 
+import pytz, sys
+from sample_info import tempDict
+from utils import load_datas
 
 class Bot(Client):
+
     def __init__(self):
         super().__init__(
             name=SESSION,
             api_id=API_ID,
             api_hash=API_HASH,
             bot_token=BOT_TOKEN,
-            plugins=dict(root="plugins")  # Ensure plugins are loaded
+            workers=200,
+            plugins={"root": "plugins"},
+            sleep_threshold=10,
         )
 
- async def start(self):
+    async def start(self, **kwargs):
         b_users, b_chats = await db.get_banned()
         temp.BANNED_USERS = b_users
         temp.BANNED_CHATS = b_chats
@@ -87,46 +89,46 @@ class Bot(Client):
     async def stop(self, *args):
         await super().stop()
         logging.info("Bot stopped. Bye.")
-        
 
-        try:
-            await db.get_banned()
-        except Exception as e:
-            logging.error(f"Failed to get banned users or chats: {e}")
+    async def iter_messages(
+        self,
+        chat_id: Union[int, str],
+        limit: int,
+        offset: int = 0,
+    ) -> Optional[AsyncGenerator["types.Message", None]]:
+        """Iterate through a chat sequentially.
+        This convenience method does the same as repeatedly calling :meth:`~pyrogram.Client.get_messages` in a loop, thus saving
+        you from the hassle of setting up boilerplate code. It is useful for getting the whole chat messages with a
+        single call.
+        Parameters:
+            chat_id (``int`` | ``str``):
+                Unique identifier (int) or username (str) of the target chat.
+                For your personal cloud (Saved Messages) you can simply use "me" or "self".
+                For a contact that exists in your Telegram address book you can use his phone number (str).
+                
+            limit (``int``):
+                Identifier of the last message to be returned.
+                
+            offset (``int``, *optional*):
+                Identifier of the first message to be returned.
+                Defaults to 0.
+        Returns:
+            ``Generator``: A generator yielding :obj:`~pyrogram.types.Message` objects.
+        Example:
+            .. code-block:: python
+                for message in app.iter_messages("pyrogram", 1, 15000):
+                    print(message.text)
+        """
+        current = offset
+        while True:
+            new_diff = min(200, limit - current)
+            if new_diff <= 0:
+                return
+            messages = await self.get_messages(chat_id, list(range(current, current+new_diff+1)))
+            for message in messages:
+                yield message
+                current += 1
 
-        try:
-            await Media.ensure_indexes()
-        except Exception as e:
-            logging.error(f"Failed to ensure database indexes: {e}")
-
-        try:
-            await self.send_message(LOG_CHANNEL, f"✅ Bot Started Successfully!\n{LOG_STR}")
-        except Exception as e:
-            logging.error(f"Failed to send start message to log channel: {e}")
-
-        try:
-            app_runner = web.AppRunner(await web_server())
-            await app_runner.setup()
-            bind_address = "0.0.0.0"
-            await web.TCPSite(app_runner, bind_address, PORT).start()
-        except Exception as e:
-            logging.error(f"Failed to start web server: {e}")
-
-        end_time = datetime.now()
-        logging.info(f"Bot started at {end_time}, duration: {end_time - start_time}")
-
-    async def stop(self, *args):
-        stop_time = datetime.now()
-        logging.info(f"Stopping bot at {stop_time}")
-        await super().stop()
 
 app = Bot()
-
-async def main():
-    await app.start()
-    print("🚀 Bot is running...")  # Confirm in console
-    await idle()  # Keeps the bot running and responding
-    await app.stop()
-
-if __name__ == "__main__":
-    asyncio.run(main())
+app.run()
